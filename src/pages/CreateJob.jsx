@@ -102,16 +102,17 @@ export default function CreateJob() {
     setSubmitting(true);
 
     try {
-      const res = await createJob({
-        dockerImage: dockerImage.trim(),
-        fileUrl,
-        requiredCpu: Number(requiredCpu),
-        requiredMemoryMB: Number(requiredMemoryMB),
-        gpuRequired,
-        maxRuntimeSeconds: Number(maxRuntimeSeconds),
-        targetWorkerId: workerId,
-        priority,
-      });
+        const res = await createJob({
+            dockerImage: dockerImage.trim(),
+            fileUrl,
+            requiredCpu: Number(requiredCpu),
+            requiredMemoryMB: Number(requiredMemoryMB),
+            gpuRequired,
+            networkRequired,   // ← new
+            maxRuntimeSeconds: Number(maxRuntimeSeconds),
+            targetWorkerId: workerId,
+            priority,
+        });
       navigate(`/jobs/${res.data.jobId}`);
     } catch (err) {
       const msg = err.response?.data?.message || 'Could not create the job. Please try again.';
