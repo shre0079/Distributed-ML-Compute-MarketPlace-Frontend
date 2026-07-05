@@ -1,17 +1,29 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import Pagination from '../components/Pagination';
 import { getMyJobs, getMyJobsByStatus } from '../api/endpoints';
 import { money, timeAgo, pillClass, priorityPillClass, truncateId } from '../utils/format';
 
 const TABS = ['ALL', 'CREATED', 'RUNNING', 'SUCCESS', 'FAILED', 'TIMEOUT', 'CANCELLED', 'EXPIRED'];
+const PAGE_SIZE = 20;
 
 export default function Jobs() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('ALL');
+  const [page, setPage] = useState(0);
+
   const [jobs, setJobs] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Switching tabs always resets back to page 0 — staying on e.g. page 3
+  // of a filter you just left would be confusing.
+  useEffect(() => {
+    setPage(0);
+  }, [activeTab]);
 
   useEffect(() => {
     let cancelled = false;
@@ -20,10 +32,14 @@ export default function Jobs() {
 
     async function load() {
       try {
-        const res = activeTab === 'ALL' ? await getMyJobs() : await getMyJobsByStatus(activeTab);
+        const res = activeTab === 'ALL'
+          ? await getMyJobs(page, PAGE_SIZE)
+          : await getMyJobsByStatus(activeTab, page, PAGE_SIZE);
+
         if (cancelled) return;
-        const sorted = [...res.data].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        setJobs(sorted);
+        setJobs(res.data.content);
+        setTotalPages(res.data.totalPages);
+        setTotalElements(res.data.totalElements);
       } catch (err) {
         if (!cancelled) setError('Could not load jobs.');
       } finally {
@@ -33,7 +49,7 @@ export default function Jobs() {
 
     load();
     return () => { cancelled = true; };
-  }, [activeTab]);
+  }, [activeTab, page]);
 
   return (
     <AppLayout>
@@ -95,6 +111,8 @@ export default function Jobs() {
           </table>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} totalElements={totalElements} onChange={setPage} />
     </AppLayout>
   );
 }
