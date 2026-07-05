@@ -12,6 +12,7 @@ export default function Dashboard() {
 
   const [wallet, setWallet] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [totalJobs, setTotalJobs] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -20,15 +21,19 @@ export default function Dashboard() {
 
     async function load() {
       try {
-        const [walletRes, jobsRes] = await Promise.all([getWallet(), getMyJobs()]);
+        // Fetching a generous page (100, sorted newest-first by the backend)
+        // is a pragmatic choice for computing "active jobs" and showing
+        // recent activity — it isn't full pagination, just enough to cover
+        // realistic activity levels at this stage. The full paginated view
+        // lives on the Jobs page. "Total Jobs" below uses the backend's own
+        // totalElements count, so that number stays accurate even beyond 100.
+        const [walletRes, jobsRes] = await Promise.all([getWallet(), getMyJobs(0, 100)]);
         if (cancelled) return;
 
         setWallet(walletRes.data);
         setWalletBalance(walletRes.data.walletBalance);
-
-        // Newest first
-        const sorted = [...jobsRes.data].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        setJobs(sorted);
+        setJobs(jobsRes.data.content);
+        setTotalJobs(jobsRes.data.totalElements);
       } catch (err) {
         if (!cancelled) setError('Could not load your dashboard. Is the backend running?');
       } finally {
@@ -76,14 +81,14 @@ export default function Dashboard() {
 
             <div className="card stat-card">
               <div className="card__label">Total Jobs</div>
-              <div className="stat-card__value">{jobs.length}</div>
+              <div className="stat-card__value">{totalJobs}</div>
               <p className="stat-card__hint">Submitted since you joined</p>
             </div>
           </div>
 
           <div className="section-title-row">
             <h2 className="section-title-row__title">Recent Jobs</h2>
-            {jobs.length > 0 && <Link to="/jobs" className="section-title-row__link">View all →</Link>}
+            {totalJobs > 0 && <Link to="/jobs" className="section-title-row__link">View all →</Link>}
           </div>
 
           <div className="card" style={{ padding: 0 }}>
