@@ -167,9 +167,10 @@ export default function CreateJob() {
               onChange={(e) => setDockerImage(e.target.value)}
               required
             />
-            <p className="field__hint">
-              Your training script must read data from <code>/app/data</code> and write output to <code>/app/data/output</code>.
-            </p>
+              <p className="field__hint">
+                  Your training script reads data from <code>/input</code> (read-only) and
+                  writes results to <code>/output</code>.
+              </p>
           </div>
 
           <div className="field">
