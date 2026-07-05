@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { logoutRequest } from '../api/endpoints';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -7,10 +8,16 @@ export default function Navbar() {
   const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+    const handleLogout = async () => {
+        try {
+            await logoutRequest();
+        } catch (err) {
+            // Even if the request fails (e.g. token already expired), still
+            // clear local state — the user's intent is to be logged out either way.
+        }
+        logout();
+        navigate('/');
+    };
 
   return (
     <header className="navbar">
