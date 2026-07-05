@@ -228,6 +228,21 @@ export default function CreateJob() {
             </label>
           </div>
 
+            <div className="field">
+                <label className="checkbox-row" style={{ marginBottom: 0 }}>
+                    <input
+                        type="checkbox"
+                        checked={networkRequired}
+                        onChange={(e) => setNetworkRequired(e.target.checked)}
+                    />
+                    <span>Require internet access</span>
+                </label>
+                <p className="field__hint">
+                    Jobs run fully network-isolated by default. Only enable this if your
+                    script needs to reach the internet (e.g. downloading pretrained weights).
+                </p>
+            </div>
+
           <div className="field">
             <label className="field__label">Max runtime</label>
             <div className="preset-row">
