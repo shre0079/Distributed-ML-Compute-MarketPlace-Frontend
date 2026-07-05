@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import Pagination from '../components/Pagination';
 import { getTransactions, deposit } from '../api/endpoints';
 import { useAuthStore } from '../store/auth';
 import { money, amountTone, truncateId } from '../utils/format';
 
 const DEPOSIT_PRESETS = [5, 10, 25, 50];
+const PAGE_SIZE = 20;
 
 export default function Wallet() {
   const navigate = useNavigate();
   const setWalletBalance = useAuthStore((s) => s.setWalletBalance);
 
   const [data, setData] = useState(null);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -20,9 +23,9 @@ export default function Wallet() {
   const [depositError, setDepositError] = useState('');
   const [depositSuccess, setDepositSuccess] = useState('');
 
-  const load = async () => {
+  const load = async (targetPage = page) => {
     try {
-      const res = await getTransactions();
+      const res = await getTransactions(targetPage, PAGE_SIZE);
       setData(res.data);
       setWalletBalance(res.data.currentBalance);
     } catch (err) {
@@ -33,9 +36,9 @@ export default function Wallet() {
   };
 
   useEffect(() => {
-    load();
+    load(page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [page]);
 
   const handleDeposit = async (e) => {
     e.preventDefault();
@@ -53,7 +56,11 @@ export default function Wallet() {
       await deposit(value);
       setDepositSuccess(`Added $${value.toFixed(2)} to your wallet.`);
       setAmount('');
-      await load();
+      if (page === 0) {
+        await load(0);
+      } else {
+        setPage(0); // triggers reload via the page-change effect
+      }
     } catch (err) {
       setDepositError(err.response?.data?.message || 'Deposit failed. Please try again.');
     } finally {
@@ -175,6 +182,13 @@ export default function Wallet() {
               </table>
             )}
           </div>
+
+          <Pagination
+            page={data.page}
+            totalPages={data.totalPages}
+            totalElements={data.totalElements}
+            onChange={setPage}
+          />
         </>
       )}
     </AppLayout>
