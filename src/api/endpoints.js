@@ -45,6 +45,8 @@ export const getJobLogs = (jobId) => api.get(`/jobs/${jobId}/logs`);
 
 export const cancelJob = (jobId) => api.post(`/jobs/${jobId}/cancel`);
 
+export const logoutRequest = () => api.post('/user/logout');
+
 // ── Admin ───────────────────────────────────────────────────────
 export const adminGetStats = () => api.get('/admin/stats');
 export const adminGetJobs = () => api.get('/admin/jobs');
