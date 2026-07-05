@@ -39,6 +39,8 @@ export const getMyJobs = () => api.get('/jobs');
 
 export const getMyJobsByStatus = (status) => api.get(`/jobs/status/${status}`);
 
+export const getJob = (jobId) => api.get(`/jobs/${jobId}`);
+
 export const getJobLogs = (jobId) => api.get(`/jobs/${jobId}/logs`);
 
 export const cancelJob = (jobId) => api.post(`/jobs/${jobId}/cancel`);
