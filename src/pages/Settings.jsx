@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
-import { getWallet } from '../api/endpoints';
+import { getWallet, logoutRequest } from '../api/endpoints';
 import { useAuthStore } from '../store/auth';
 import { money } from '../utils/format';
-import { logoutRequest } from '../api/endpoints';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -23,15 +22,15 @@ export default function Settings() {
     return () => { cancelled = true; };
   }, []);
 
-    const handleLogout = async () => {
-        try {
-            await logoutRequest();
-        } catch (err) {
-            // Same reasoning as Navbar — proceed with local logout regardless.
-        }
-        logout();
-        navigate('/');
-    };
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+    } catch (err) {
+      // Same reasoning as Navbar — proceed with local logout regardless.
+    }
+    logout();
+    navigate('/');
+  };
 
   return (
     <AppLayout>
