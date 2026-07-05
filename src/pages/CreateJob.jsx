@@ -32,13 +32,12 @@ export default function CreateJob() {
   const [requiredCpu, setRequiredCpu] = useState(1);
   const [requiredMemoryMB, setRequiredMemoryMB] = useState(256);
   const [gpuRequired, setGpuRequired] = useState(false);
+  const [networkRequired, setNetworkRequired] = useState(false);
   const [maxRuntimeSeconds, setMaxRuntimeSeconds] = useState(300);
   const [priority, setPriority] = useState('NORMAL');
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
-
-  const [networkRequired, setNetworkRequired] = useState(false);
 
   useEffect(() => {
     if (!workerId) {
@@ -102,17 +101,17 @@ export default function CreateJob() {
     setSubmitting(true);
 
     try {
-        const res = await createJob({
-            dockerImage: dockerImage.trim(),
-            fileUrl,
-            requiredCpu: Number(requiredCpu),
-            requiredMemoryMB: Number(requiredMemoryMB),
-            gpuRequired,
-            networkRequired,   // ← new
-            maxRuntimeSeconds: Number(maxRuntimeSeconds),
-            targetWorkerId: workerId,
-            priority,
-        });
+      const res = await createJob({
+        dockerImage: dockerImage.trim(),
+        fileUrl,
+        requiredCpu: Number(requiredCpu),
+        requiredMemoryMB: Number(requiredMemoryMB),
+        gpuRequired,
+        networkRequired,
+        maxRuntimeSeconds: Number(maxRuntimeSeconds),
+        targetWorkerId: workerId,
+        priority,
+      });
       navigate(`/jobs/${res.data.jobId}`);
     } catch (err) {
       const msg = err.response?.data?.message || 'Could not create the job. Please try again.';
@@ -167,10 +166,9 @@ export default function CreateJob() {
               onChange={(e) => setDockerImage(e.target.value)}
               required
             />
-              <p className="field__hint">
-                  Your training script reads data from <code>/input</code> (read-only) and
-                  writes results to <code>/output</code>.
-              </p>
+            <p className="field__hint">
+              Your training script reads data from <code>/input</code> (read-only) and writes results to <code>/output</code>.
+            </p>
           </div>
 
           <div className="field">
@@ -228,20 +226,19 @@ export default function CreateJob() {
             </label>
           </div>
 
-            <div className="field">
-                <label className="checkbox-row" style={{ marginBottom: 0 }}>
-                    <input
-                        type="checkbox"
-                        checked={networkRequired}
-                        onChange={(e) => setNetworkRequired(e.target.checked)}
-                    />
-                    <span>Require internet access</span>
-                </label>
-                <p className="field__hint">
-                    Jobs run fully network-isolated by default. Only enable this if your
-                    script needs to reach the internet (e.g. downloading pretrained weights).
-                </p>
-            </div>
+          <div className="field">
+            <label className="checkbox-row" style={{ marginBottom: 0 }}>
+              <input
+                type="checkbox"
+                checked={networkRequired}
+                onChange={(e) => setNetworkRequired(e.target.checked)}
+              />
+              <span>Require internet access</span>
+            </label>
+            <p className="field__hint">
+              Jobs run fully network-isolated by default. Only enable this if your script needs to reach the internet (e.g. downloading pretrained weights).
+            </p>
+          </div>
 
           <div className="field">
             <label className="field__label">Max runtime</label>
