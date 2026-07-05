@@ -38,7 +38,7 @@ export default function CreateJob() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-
+  const [networkRequired, setNetworkRequired] = useState(false);
 
   useEffect(() => {
     if (!workerId) {
