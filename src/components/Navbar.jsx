@@ -8,16 +8,16 @@ export default function Navbar() {
   const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
 
-    const handleLogout = async () => {
-        try {
-            await logoutRequest();
-        } catch (err) {
-            // Even if the request fails (e.g. token already expired), still
-            // clear local state — the user's intent is to be logged out either way.
-        }
-        logout();
-        navigate('/');
-    };
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+    } catch (err) {
+      // Even if this fails (e.g. token already expired), still clear
+      // local state — the user's intent is to be logged out either way.
+    }
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="navbar">
