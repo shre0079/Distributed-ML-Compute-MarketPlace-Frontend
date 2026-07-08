@@ -360,6 +360,34 @@ export default function Admin() {
           )}
         </div>
       )}
+
+      {section === 'AUDIT LOG' && (
+        <>
+          <div className="card" style={{ padding: 0 }}>
+            {auditLog === null ? <p className="empty-note" style={{ padding: 24 }}>Loading...</p> : auditLog.length === 0 ? (
+              <div className="table__empty" style={{ padding: '48px 20px' }}>No admin actions recorded yet.</div>
+            ) : (
+              <table className="table">
+                <thead>
+                  <tr><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  {auditLog.map((entry) => (
+                    <tr key={entry.auditId} style={{ cursor: 'default' }}>
+                      <td className="mono">{truncateId(entry.adminUserId, 10)}</td>
+                      <td><span className="pill pill--neutral">{entry.action}</span></td>
+                      <td className="mono">{truncateId(entry.targetId, 16)}</td>
+                      <td>{entry.details || '—'}</td>
+                      <td>{timeAgo(entry.timestamp)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+          <Pagination page={auditPage} totalPages={auditTotalPages} totalElements={auditTotalElements} onChange={setAuditPage} />
+        </>
+      )}
     </AppLayout>
   );
 }
