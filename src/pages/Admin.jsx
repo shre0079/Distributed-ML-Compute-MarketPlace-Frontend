@@ -5,11 +5,11 @@ import Pagination from '../components/Pagination';
 import {
   adminGetStats, adminGetJobs, adminGetWorkers, adminGetUsers,
   adminGetWithdrawals, adminForceFailJob, adminBanWorker,
-  adminApproveWithdrawal, adminRejectWithdrawal,
+  adminApproveWithdrawal, adminRejectWithdrawal, adminGetAuditLog,
 } from '../api/endpoints';
 import { money, timeAgo, pillClass, priorityPillClass, truncateId } from '../utils/format';
 
-const SECTIONS = ['STATS', 'JOBS', 'WORKERS', 'USERS', 'WITHDRAWALS'];
+const SECTIONS = ['STATS', 'JOBS', 'WORKERS', 'USERS', 'WITHDRAWALS', 'AUDIT LOG'];
 const PAGE_SIZE = 20;
 
 export default function Admin() {
@@ -37,6 +37,11 @@ export default function Admin() {
   // practice — left as a single unpaginated fetch rather than adding
   // page controls for a list that's rarely more than a screenful.
   const [withdrawals, setWithdrawals] = useState(null);
+
+  const [auditLog, setAuditLog] = useState(null);
+  const [auditPage, setAuditPage] = useState(0);
+  const [auditTotalPages, setAuditTotalPages] = useState(0);
+  const [auditTotalElements, setAuditTotalElements] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

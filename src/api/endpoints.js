@@ -73,6 +73,9 @@ export const adminGetTransactions = (page = 0, size = 20) =>
 
 export const adminGetWithdrawals = () => api.get('/admin/withdrawals');
 
+export const adminGetAuditLog = (page = 0, size = 20) =>
+  api.get(`/admin/audit-log?page=${page}&size=${size}`);
+
 export const adminForceFailJob = (jobId) =>
   api.post(`/admin/jobs/${jobId}/force-fail`);
 
