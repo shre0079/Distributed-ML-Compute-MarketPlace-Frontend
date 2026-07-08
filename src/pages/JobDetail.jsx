@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import { getJob, getJobLogs, cancelJob, downloadArtifact } from '../api/endpoints';
@@ -18,6 +18,17 @@ export default function JobDetail() {
 
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
+  const [liveStreaming, setLiveStreaming] = useState(false);
+  const terminalRef = useRef(null);
+
+  // Auto-scroll only if already near the bottom — respects a user who's
+  // scrolled up to read earlier output while new lines keep arriving.
+  useEffect(() => {
+    const el = terminalRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    if (atBottom) el.scrollTop = el.scrollHeight;
+  }, [logs]);
 
   const loadJob = async () => {
     try {
@@ -50,14 +61,23 @@ export default function JobDetail() {
       if (cancelled) return;
 
       if (j) {
-        await loadLogs();
+        // Only fetch persisted logs upfront if the job has already
+        // finished — while CREATED/RUNNING, job.logs doesn't exist yet
+        // server-side (it's only written once by the result/timeout
+        // upload), so there's nothing authoritative to fetch. Live
+        // content during RUNNING comes exclusively from the WebSocket
+        // effect below.
+        if (j.status !== 'CREATED' && j.status !== 'RUNNING') {
+          await loadLogs();
+        }
 
-        // Poll while the job is still in-flight; stop once it settles
         if (j.status === 'CREATED' || j.status === 'RUNNING') {
           interval = setInterval(async () => {
             const updated = await loadJob();
-            await loadLogs();
             if (updated && updated.status !== 'CREATED' && updated.status !== 'RUNNING') {
+              // Job just finished — replace whatever partial content the
+              // WebSocket streamed with the final, authoritative logs.
+              await loadLogs();
               clearInterval(interval);
             }
           }, 4000);
@@ -70,6 +90,25 @@ export default function JobDetail() {
     return () => { cancelled = true; if (interval) clearInterval(interval); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
+
+  // Live log streaming — purely additive. If the socket never connects
+  // or drops, the polling effect above still delivers the final logs
+  // once the job completes, so nothing about job tracking depends on
+  // this succeeding.
+  useEffect(() => {
+    if (!job || job.status !== 'RUNNING') return;
+
+    const token = localStorage.getItem('dcm_token');
+    const wsUrl = `ws://localhost:8080/ws/jobs/${jobId}?token=${token}`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => setLiveStreaming(true);
+    ws.onmessage = (event) => setLogs((prev) => prev + event.data);
+    ws.onerror = () => setLiveStreaming(false);
+    ws.onclose = () => setLiveStreaming(false);
+
+    return () => ws.close();
+  }, [job?.status, jobId]);
 
   const handleCancel = async () => {
     setCancelError('');
@@ -230,6 +269,7 @@ export default function JobDetail() {
                   Download Logs ↓
                 </button>
               )}
+              {liveStreaming && <span className="pill pill--running">● LIVE</span>}
               <div className="terminal-dots">
                 <span className="dot dot--red" />
                 <span className="dot dot--yellow" />
@@ -237,11 +277,11 @@ export default function JobDetail() {
               </div>
             </div>
           </div>
-          <pre className="terminal scroll-thin">
+          <pre className="terminal scroll-thin" ref={terminalRef}>
             {logs || (job.status === 'CREATED'
               ? 'Waiting for a worker to pick up this job...'
               : job.status === 'RUNNING'
-                ? 'Job is running — logs will appear once it completes.'
+                ? (liveStreaming ? 'Watching live — waiting for output...' : 'Connecting to live stream...')
                 : 'No logs available for this job.')}
           </pre>
         </div>
