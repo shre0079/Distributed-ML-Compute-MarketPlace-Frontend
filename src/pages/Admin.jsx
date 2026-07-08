@@ -107,6 +107,21 @@ export default function Admin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section]);
 
+  useEffect(() => {
+    if (section !== 'AUDIT LOG') return;
+    let ignore = false;
+    setError('');
+    adminGetAuditLog(auditPage, PAGE_SIZE)
+      .then((res) => {
+        if (ignore) return;
+        setAuditLog(res.data.content);
+        setAuditTotalPages(res.data.totalPages);
+        setAuditTotalElements(res.data.totalElements);
+      })
+      .catch(() => { if (!ignore) setError('Could not load the audit log.'); });
+    return () => { ignore = true; };
+  }, [section, auditPage]);
+
   const handleForceFail = async (jobId) => {
     setActioningId(jobId);
     try {
