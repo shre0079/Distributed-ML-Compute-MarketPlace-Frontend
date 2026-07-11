@@ -156,7 +156,7 @@ export default function Landing() {
             </p>
             <div className="cta-strip__actions">
               <Link to="/register" className="btn btn--primary">Start Training Now</Link>
-              <Link to="/register" className="btn btn--outline">Become a Provider</Link>
+              <Link to="/download" className="btn btn--outline">Become a Provider</Link>
             </div>
           </div>
         </section>

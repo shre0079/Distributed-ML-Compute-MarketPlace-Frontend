@@ -18,7 +18,7 @@ export default function Footer() {
         <div className="footer__col">
           <div className="footer__heading">Platform</div>
           <Link to="/marketplace">Marketplace</Link>
-          <Link to="/register">Become a Provider</Link>
+          <Link to="/download">Become a Provider</Link>
         </div>
 
         <div className="footer__col">
