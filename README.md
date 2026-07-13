@@ -6,7 +6,7 @@
 
 The user-facing web application for **DCM (Distributed Compute Marketplace)**. This is where job submitters register, browse available compute workers, submit training jobs, watch them run in real time, and manage their wallet — plus a full admin panel for platform oversight.
 
-A standalone single-page app (SPA), built with React + Vite, talking to the [DCM Backend](../DCM-Backend) over a REST API and a WebSocket for live job logs.
+A standalone single-page app (SPA), built with React + Vite, talking to the [DCM Backend](https://github.com/shre0079/Distributed-ML-Compute-MarketPlace-Backend) over a REST API and a WebSocket for live job logs.
 
 ---
 
