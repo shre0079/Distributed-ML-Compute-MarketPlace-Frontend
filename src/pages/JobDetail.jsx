@@ -99,7 +99,7 @@ export default function JobDetail() {
     if (!job || job.status !== 'RUNNING') return;
 
     const token = localStorage.getItem('dcm_token');
-    const wsUrl = `ws://localhost:8080/ws/jobs/${jobId}?token=${token}`;
+    const wsUrl = `ws://https://distributed-ml-compute-marketplace.onrender.com/ws/jobs/${jobId}?token=${token}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => setLiveStreaming(true);
